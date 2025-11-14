@@ -30,6 +30,8 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
     private JButton exitButton;        // Exit button
     private JTextField wagesField;     // Wages text field
     private JTextField loansField;     // Loans text field
+    private JTextField rentField;      // Rent text field
+    private JTextField foodField;      // Food text field
     private JTextField totalIncomeField; // Total Income field
 
     // constructor - create UI  (dont need to change this)
@@ -47,6 +49,10 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         // Top row (0) - "INCOME" label
         JLabel incomeLabel = new JLabel("INCOME");
         addComponent(incomeLabel, 0, 0);
+        
+        // Top row (0) - "EXPENDITURE" label
+        JLabel expenditureLabel = new JLabel("EXPENDITURES"); ///NEW
+        addComponent(expenditureLabel, 0, 4);
 
         // Row 1 - Wages label followed by wages textbox
         JLabel wagesLabel = new JLabel("Wages");
@@ -58,6 +64,15 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         wagesField.setHorizontalAlignment(JTextField.RIGHT) ;    // number is at right end of field
         addComponent(wagesField, 1, 1);   
 
+        // Row 1 - Rent label followed by rent textbox
+        JLabel rentLabel = new JLabel("Rent");
+        addComponent(rentLabel, 1, 4);
+
+        // set up text box for entering rent
+        rentField = new JTextField("", 10);    // blank initially, with 10 columns
+        rentField.setHorizontalAlignment(JTextField.RIGHT);     // number is at right end of field
+        addComponent(rentField, 1, 5);
+
         // Row 2 - Loans label followed by loans textbox
         JLabel loansLabel = new JLabel("Loans");
         addComponent(loansLabel, 2, 0);
@@ -65,7 +80,16 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         // set up text box for entering loans
         loansField = new JTextField("", 10);   // blank initially, with 10 columns
         loansField.setHorizontalAlignment(JTextField.RIGHT) ;    // number is at right end of field
-        addComponent(loansField, 2, 1); 
+        addComponent(loansField, 2, 1);
+
+        // Row 2  - Food label followed by food textbox
+        JLabel foodLabel = new JLabel("Food");
+        addComponent(foodLabel, 2, 4);
+
+        // set up text box for entering food expenditure
+        foodField = new JTextField("", 10);    // blank initially, with 10 columns
+        foodField.setHorizontalAlignment(JTextField.RIGHT);     // number is at right of field
+        addComponent(foodField, 2, 5);
 
         // Row 3 - Total Income label followed by total income field
         JLabel totalIncomeLabel = new JLabel("Total Income");
@@ -85,7 +109,7 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         exitButton = new JButton("Exit");
         addComponent(exitButton, 5, 0);  
 
-        // set up  listeners (in a spearate method)
+        // set up  listeners (in a separate method)
         initListeners();
     }
 

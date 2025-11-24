@@ -33,8 +33,14 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
     private JTextField taxField;       // Tax text field
     private JTextField rentField;      // Rent text field
     private JTextField foodField;      // Food text field
-    private JTextField interestField; // Investments text field    
+    private JTextField interestField; // interest text field    
     private JTextField totalIncomeField; // Total Income field
+    private String selectedOptionWage;
+    private String selectedOptionLoans;
+    private String selectedOptionInterest;
+    private String selectedOptionTax;
+    private String selectedOptionRent;
+    private String selectedOptionFood;
 
     // constructor - create UI  (dont need to change this)
     public BudgetBase(JFrame frame) {
@@ -66,6 +72,35 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         wagesField.setHorizontalAlignment(JTextField.RIGHT) ;    // number is at right end of field
         addComponent(wagesField, 1, 1);   
 
+        /////
+        String[] recurrenceOptions = new String[] {"Yearly", "Monthly", "Weekly"};
+        // wages dropdown
+        JComboBox<String> wagesList = new JComboBox<>(recurrenceOptions);
+        addComponent(wagesList, 1, 2);
+        selectedOptionWage = (String)wagesList.getSelectedItem();
+        // rent dropdown
+        JComboBox<String> rentList = new JComboBox<>(recurrenceOptions);
+        addComponent(rentList, 2, 2);
+        selectedOptionRent = (String)rentList.getSelectedItem();
+        // loans dropdown
+        JComboBox<String> loansList = new JComboBox<>(recurrenceOptions);
+        addComponent(loansList, 3, 2);
+        selectedOptionLoans = (String)loansList.getSelectedItem();
+        // food dropdown
+        JComboBox<String> foodList = new JComboBox<>(recurrenceOptions);
+        addComponent(foodList, 1, 6);
+        selectedOptionFood = (String)foodList.getSelectedItem();
+        // interest dropdown
+        JComboBox<String> interestList = new JComboBox<>(recurrenceOptions);
+        addComponent(interestList, 2, 6);
+        selectedOptionInterest = (String)interestList.getSelectedItem();
+        // tax dropdown
+        JComboBox<String> taxList = new JComboBox<>(recurrenceOptions);
+        addComponent(taxList, 3, 6);
+        selectedOptionTax = (String)taxList.getSelectedItem();
+        //
+
+
         // Row 1 - Rent label followed by rent textbox
         JLabel rentLabel = new JLabel("Rent");
         addComponent(rentLabel, 1, 4);
@@ -93,7 +128,7 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         foodField.setHorizontalAlignment(JTextField.RIGHT);     // number is at right of field
         addComponent(foodField, 2, 5);
 
-        // Row 3 - Investments label followed by investment textbox
+        // Row 3 - interest label followed by interest textbox
         JLabel interestLabel = new JLabel("Investments");
         addComponent(interestLabel, 3, 0);
 
@@ -169,18 +204,41 @@ public class BudgetBase extends JPanel {    // based on Swing JPanel
         // get values from income text fields.  valie is NaN if an error occurs
         double wages = getTextFieldValue(wagesField);
         double loans = getTextFieldValue(loansField);
+        double interest = getTextFieldValue(interestField);
+        double tax = getTextFieldValue(taxField);
+        double rent = getTextFieldValue(rentField);
+        double food = getTextFieldValue(foodField);
+
 
         // clear total field and return if any value is NaN (error)
-        if (Double.isNaN(wages) || Double.isNaN(loans)) {
+        if (Double.isNaN(wages) || Double.isNaN(loans) || Double.isNaN(interest) || Double.isNaN(tax) || Double.isNaN(rent) || Double.isNaN(food)) {
             totalIncomeField.setText("");  // clear total income field
             wages = 0.0;
             return wages;   // exit method and do nothing
         }
 
+        wages = incomeTimePeriod(selectedOptionWage, wages);
+        loans = incomeTimePeriod(selectedOptionLoans, loans);
+        interest = incomeTimePeriod(selectedOptionInterest, interest);
+        tax = incomeTimePeriod(selectedOptionTax, tax);
+        rent = incomeTimePeriod(selectedOptionRent, rent);
+        food = incomeTimePeriod(selectedOptionFood, food);
         // otherwise calculate total income and update text field
-        double totalIncome = wages + loans;
+        double totalIncome = wages + loans + interest - (tax + rent + food);
         totalIncomeField.setText(String.format("%.2f",totalIncome));  // format with 2 digits after the .
         return totalIncome;
+    }
+
+    private double incomeTimePeriod(String timePeriod, Double money){
+        if(timePeriod.equals("Yearly")){
+            return money;
+        }
+        else if(timePeriod.equals("Monthly")){
+            return money;
+        }
+        else{
+            return money;
+        }
     }
 
     // return the value if a text field as a double

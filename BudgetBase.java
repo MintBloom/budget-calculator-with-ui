@@ -37,10 +37,10 @@ public class BudgetBase extends JPanel  {    // based on Swing JPanel
     private JComboBox netGainList;
     private JTextField wagesField;     // Wages text field
     private JTextField loansField;     // Loans text field
+    private JTextField interestField; // interest text field    
     private JTextField taxField;       // Tax text field
     private JTextField rentField;      // Rent text field
     private JTextField foodField;      // Food text field
-    private JTextField interestField; // interest text field    
     private JTextField totalNetGainField; // Total Income field
 
     // constructor - create UI  (dont need to change this)
@@ -166,6 +166,7 @@ public class BudgetBase extends JPanel  {    // based on Swing JPanel
 
     // set up listeners
     // initially just for buttons, can add listeners for text fields
+    
     private void initListeners() {
 
         // exitButton - exit program when pressed
@@ -182,6 +183,33 @@ public class BudgetBase extends JPanel  {    // based on Swing JPanel
             }
         });
 
+        // general action listener which which call calculateTotalIncome() when action is performed
+        ActionListener calculateJComboListener = new java.awt.event.ActionListener() {
+            public void actionPerformed(ActionEvent e){
+                calculateTotalIncome();
+            }
+        };
+
+        //each jcombobox automatically calls the calculateTotalIncome() when edited
+        wagesList.addActionListener(calculateJComboListener);
+        loansList.addActionListener(calculateJComboListener);
+        interestList.addActionListener(calculateJComboListener);
+        taxList.addActionListener(calculateJComboListener);
+        rentList.addActionListener(calculateJComboListener);
+        foodList.addActionListener(calculateJComboListener);
+        netGainList.addActionListener(calculateJComboListener);
+
+        javax.swing.event.DocumentListener calculateFieldListener = new javax.swing.event.DocumentListener(){
+            public void changedUpdate(javax.swing.event.DocumentListener e){
+                calculateTotalIncome();
+            }
+            public void removeUpdate(javax.swing.event.DocumentListener e){
+                calculateTotalIncome();
+            }
+            public void insertUpdate(javax.swing.event.DocumentListener e){
+                calculateTotalIncome();
+            }
+        };
     }
 
     // add a component at specified row and column in UI.  (0,0) is top-left corner

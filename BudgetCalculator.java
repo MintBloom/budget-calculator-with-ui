@@ -17,9 +17,11 @@ package Budget;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 // class definition
-public class BudgetBase extends JPanel  {    // based on Swing JPanel
+public class BudgetCalculator extends JPanel  {    // based on Swing JPanel
 
     // high level UI stuff
     JFrame topLevelFrame;  // top-level JFrame
@@ -44,7 +46,7 @@ public class BudgetBase extends JPanel  {    // based on Swing JPanel
     private JTextField totalNetGainField; // Total Income field
 
     // constructor - create UI  (dont need to change this)
-    public BudgetBase(JFrame frame) {
+    public BudgetCalculator(JFrame frame) {
         topLevelFrame = frame; // keep track of top-level frame
         setLayout(new GridBagLayout());  // use GridBag layout
         initComponents();  // initalise components
@@ -61,7 +63,7 @@ public class BudgetBase extends JPanel  {    // based on Swing JPanel
         
         // Top row (0) - "EXPENDITURE" label
         JLabel expenditureLabel = new JLabel("EXPENDITURES"); ///NEW
-        addComponent(expenditureLabel, 0, 4);
+        addComponent(expenditureLabel, 0, 3);
 
         // Row 1 - Wages label followed by wages textbox
         JLabel wagesLabel = new JLabel("Wages");
@@ -78,33 +80,39 @@ public class BudgetBase extends JPanel  {    // based on Swing JPanel
         // wages dropdown
         wagesList = new JComboBox<>(recurrenceOptions);
         addComponent(wagesList, 1, 2);
-        // rent dropdown
-        rentList = new JComboBox<>(recurrenceOptions);
-        addComponent(rentList, 2, 2);
+        
         // loans dropdown
         loansList = new JComboBox<>(recurrenceOptions);
-        addComponent(loansList, 3, 2);
-        // food dropdown
-        foodList = new JComboBox<>(recurrenceOptions);
-        addComponent(foodList, 1, 6);
+        addComponent(loansList, 2, 2);
+        
         // interest dropdown
         interestList = new JComboBox<>(recurrenceOptions);
-        addComponent(interestList, 2, 6);
+        addComponent(interestList, 3, 2);
+        
+        // rent dropdown
+        rentList = new JComboBox<>(recurrenceOptions);
+        addComponent(rentList, 1, 5);
+
+        // food dropdown
+        foodList = new JComboBox<>(recurrenceOptions);
+        addComponent(foodList, 2, 5);
+        
         // tax dropdown
         taxList = new JComboBox<>(recurrenceOptions);
-        addComponent(taxList, 3, 6);
+        addComponent(taxList, 3, 5);
+        
         // income dropdown
         netGainList = new JComboBox<>(recurrenceOptions);
         addComponent(netGainList, 4, 2);
 
         // Row 1 - Rent label followed by rent textbox
         JLabel rentLabel = new JLabel("Rent");
-        addComponent(rentLabel, 1, 4);
+        addComponent(rentLabel, 1, 3);
 
         // set up text box for entering rent
         rentField = new JTextField("", 10);    // blank initially, with 10 columns
         rentField.setHorizontalAlignment(JTextField.RIGHT);     // number is at right end of field
-        addComponent(rentField, 1, 5);
+        addComponent(rentField, 1, 4);
 
         // Row 2 - Loans label followed by loans textbox
         JLabel loansLabel = new JLabel("Loans");
@@ -117,15 +125,15 @@ public class BudgetBase extends JPanel  {    // based on Swing JPanel
 
         // Row 2  - Food label followed by food textbox
         JLabel foodLabel = new JLabel("Food");
-        addComponent(foodLabel, 2, 4);
+        addComponent(foodLabel, 2, 3);
 
         // set up text box for entering food expenditure
         foodField = new JTextField("", 10);    // blank initially, with 10 columns
         foodField.setHorizontalAlignment(JTextField.RIGHT);     // number is at right of field
-        addComponent(foodField, 2, 5);
+        addComponent(foodField, 2, 4);
 
         // Row 3 - interest label followed by interest textbox
-        JLabel interestLabel = new JLabel("Investments");
+        JLabel interestLabel = new JLabel("Interest(Savings)");
         addComponent(interestLabel, 3, 0);
 
         // set up text box for entering investments income
@@ -135,15 +143,15 @@ public class BudgetBase extends JPanel  {    // based on Swing JPanel
 
         // Row 3 - Tax label followed by tax textbox
         JLabel taxLabel = new JLabel("Tax");
-        addComponent(taxLabel, 3, 4);
+        addComponent(taxLabel, 3, 3);
         
         // set up text box for entering 
         taxField = new JTextField("", 10);
         taxField.setHorizontalAlignment(JTextField.RIGHT);
-        addComponent(taxField, 3, 5);
+        addComponent(taxField, 3, 4);
 
         // Row 4 - Total Income label followed by total income field
-        JLabel totalIncomeLabel = new JLabel("Total Income");
+        JLabel totalIncomeLabel = new JLabel("Net Gain");
         addComponent(totalIncomeLabel, 4, 0);
 
         // set up text box for displaying total income.  Users cam view, but cannot directly edit it
@@ -166,8 +174,43 @@ public class BudgetBase extends JPanel  {    // based on Swing JPanel
 
     // set up listeners
     // initially just for buttons, can add listeners for text fields
-    
+    private void updateFieldAuto(JTextField field){
+        field.getDocument().addDocumentListener(new DocumentListener() {
+            
+            // Utility method to retrieve and process the text
+            private void updateStatus() {
+                // We use SwingUtilities.invokeLater to ensure any UI-related 
+                // operations are done safely on the Event Dispatch Thread (EDT)
+                SwingUtilities.invokeLater(() -> {
+                    calculateTotalIncome();
+                });
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                updateStatus();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                updateStatus();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                updateStatus();
+            }
+        });
+    }
     private void initListeners() {
+
+        // applying the updateFieldAuto method to multiple fields
+        updateFieldAuto(wagesField);
+        updateFieldAuto(loansField);
+        updateFieldAuto(interestField);
+        updateFieldAuto(taxField);
+        updateFieldAuto(rentField);
+        updateFieldAuto(foodField);
 
         // exitButton - exit program when pressed
         exitButton.addActionListener(new java.awt.event.ActionListener() {
@@ -199,17 +242,6 @@ public class BudgetBase extends JPanel  {    // based on Swing JPanel
         foodList.addActionListener(calculateJComboListener);
         netGainList.addActionListener(calculateJComboListener);
 
-        javax.swing.event.DocumentListener calculateFieldListener = new javax.swing.event.DocumentListener(){
-            public void changedUpdate(javax.swing.event.DocumentListener e){
-                calculateTotalIncome();
-            }
-            public void removeUpdate(javax.swing.event.DocumentListener e){
-                calculateTotalIncome();
-            }
-            public void insertUpdate(javax.swing.event.DocumentListener e){
-                calculateTotalIncome();
-            }
-        };
     }
 
     // add a component at specified row and column in UI.  (0,0) is top-left corner
@@ -319,7 +351,7 @@ public class BudgetBase extends JPanel  {    // based on Swing JPanel
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
  
         //Create and set up the content pane.
-        BudgetBase newContentPane = new BudgetBase(frame);
+        BudgetCalculator newContentPane = new BudgetCalculator(frame);
         newContentPane.setOpaque(true); //content panes must be opaque
         frame.setContentPane(newContentPane);
  

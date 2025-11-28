@@ -30,20 +30,22 @@ public class BudgetCalculator extends JPanel  {    // based on Swing JPanel
     // widgets which may have listeners and/or values
     private JButton calculateButton;   // Calculate button
     private JButton exitButton;        // Exit button
-    private JComboBox wagesList;
-    private JComboBox loansList;
-    private JComboBox interestList;
-    private JComboBox taxList;
-    private JComboBox rentList;
-    private JComboBox foodList;
-    private JComboBox netGainList;
+    private JComboBox wagesList;        // Wages Dropdown
+    private JComboBox loansList;        // Loans Dropdown
+    private JComboBox interestList;     // Interest Dropdown
+    private JComboBox taxList;          // Tax Dropdown
+    private JComboBox rentList;         // Rent Dropdown
+    private JComboBox foodList;         // Food Dropdown
+    private JComboBox netGainList;      // Net Gain Dropdown. Value of this jcombobox is used for totalIncome, totalSpending, NetGain fields 
     private JTextField wagesField;     // Wages text field
     private JTextField loansField;     // Loans text field
     private JTextField interestField; // interest text field    
     private JTextField taxField;       // Tax text field
     private JTextField rentField;      // Rent text field
     private JTextField foodField;      // Food text field
-    private JTextField totalNetGainField; // Total Income field
+    private JTextField totalIncomeField; // Total Income text field
+    private JTextField totalSpendingField; // Total Spendings text field
+    private JTextField totalNetGainField; // Total Net Gain text field (income minus spending)
 
     // constructor - create UI  (dont need to change this)
     public BudgetCalculator(JFrame frame) {
@@ -75,12 +77,12 @@ public class BudgetCalculator extends JPanel  {    // based on Swing JPanel
         wagesField.setHorizontalAlignment(JTextField.RIGHT) ;    // number is at right end of field
         addComponent(wagesField, 1, 1);   
 
-        /////
+        // All JComboBoxes //////////////////////////////////
         String[] recurrenceOptions = new String[] {"Yearly", "Monthly", "Weekly"};
         // wages dropdown
         wagesList = new JComboBox<>(recurrenceOptions);
         addComponent(wagesList, 1, 2);
-        
+
         // loans dropdown
         loansList = new JComboBox<>(recurrenceOptions);
         addComponent(loansList, 2, 2);
@@ -104,6 +106,7 @@ public class BudgetCalculator extends JPanel  {    // based on Swing JPanel
         // income dropdown
         netGainList = new JComboBox<>(recurrenceOptions);
         addComponent(netGainList, 4, 2);
+        //////////////////////////////////////////////////////////
 
         // Row 1 - Rent label followed by rent textbox
         JLabel rentLabel = new JLabel("Rent");
@@ -145,20 +148,40 @@ public class BudgetCalculator extends JPanel  {    // based on Swing JPanel
         JLabel taxLabel = new JLabel("Tax");
         addComponent(taxLabel, 3, 3);
         
-        // set up text box for entering 
+        // set up text box for entering tax
         taxField = new JTextField("", 10);
         taxField.setHorizontalAlignment(JTextField.RIGHT);
         addComponent(taxField, 3, 4);
 
-        // Row 4 - Total Income label followed by total income field
-        JLabel totalIncomeLabel = new JLabel("Net Gain");
+        // Row 4 - Total Income Label
+        JLabel totalIncomeLabel = new JLabel("Total Income", 10);
         addComponent(totalIncomeLabel, 4, 0);
 
-        // set up text box for displaying total income.  Users cam view, but cannot directly edit it
+        // set up text box for total income
+        totalIncomeField = new JTextField("0",10);
+        totalIncomeField.setHorizontalAlignment(JTextField.RIGHT);
+        totalIncomeField.setEditable(false);
+        addComponent(totalIncomeField, 4, 1);
+        
+        // Row 4 - Total Spending Label
+        JLabel totalSpendingLabel = new JLabel("Total Spending", 10);
+        addComponent(totalSpendingLabel, 4, 3);
+
+        // set up text box for entering total spending
+        totalSpendingField = new JTextField("0",10);
+        totalSpendingField.setHorizontalAlignment(JTextField.RIGHT);
+        totalSpendingField.setEditable(false);
+        addComponent(totalSpendingField, 4, 4);
+
+        // Row 5 - Total Income label followed by total income field
+        JLabel totalNetGainLabel = new JLabel("Net Gain");
+        addComponent(totalNetGainLabel, 5, 0);
+
+        // set up text box for displaying total Net Gain.  Users cam view, but cannot directly edit it
         totalNetGainField = new JTextField("0", 10);   // 0 initially, with 10 columns
-        totalNetGainField.setHorizontalAlignment(JTextField.RIGHT) ;    // number is at right end of field
+        totalNetGainField.setHorizontalAlignment(JTextField.RIGHT);    // number is at right end of field
         totalNetGainField.setEditable(false);    // user cannot directly edit this field (ie, it is read-only)
-        addComponent(totalNetGainField, 4, 1);  
+        addComponent(totalNetGainField, 5, 1);
 
         // Row 6 - Calculate Button
         calculateButton = new JButton("Calculate");
@@ -166,7 +189,7 @@ public class BudgetCalculator extends JPanel  {    // based on Swing JPanel
 
         // Row 7 - Exit Button
         exitButton = new JButton("Exit");
-        addComponent(exitButton, 7, 0);  
+        addComponent(exitButton, 6, 1);  
 
         // set up  listeners (in a separate method)
         initListeners();
@@ -183,6 +206,8 @@ public class BudgetCalculator extends JPanel  {    // based on Swing JPanel
                 // operations are done safely on the Event Dispatch Thread (EDT)
                 SwingUtilities.invokeLater(() -> {
                     calculateTotalIncome();
+                    calculateTotalSpending();
+                    calculateNetGain();
                 });
             }
 
@@ -222,14 +247,14 @@ public class BudgetCalculator extends JPanel  {    // based on Swing JPanel
         // calculateButton - call calculateTotalIncome() when pressed
         calculateButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                calculateTotalIncome();
+                calculateNetGain();
             }
         });
 
         // general action listener which which call calculateTotalIncome() when action is performed
         ActionListener calculateJComboListener = new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent e){
-                calculateTotalIncome();
+                calculateNetGain();
             }
         };
 
@@ -255,7 +280,7 @@ public class BudgetCalculator extends JPanel  {    // based on Swing JPanel
 
     // update totalIncomeField (eg, when Calculate is pressed)
     // use double to hold numbers, so user can type fractional amounts such as 134.50
-    public double calculateTotalIncome() {
+    public double calculateNetGain() {
 
         // get values from income text fields.  value is NaN if an error occurs
         double wages = getTextFieldValue(wagesField);
@@ -288,9 +313,66 @@ public class BudgetCalculator extends JPanel  {    // based on Swing JPanel
         food = returnNetGain(selectedFoodTime, food);
 
         // otherwise calculate total income and update text field
-        double totalIncome = wages + loans + interest - (tax + rent + food);
-        totalNetGainField.setText(String.format("%.2f",totalIncome));  // format with 2 digits after the .
+        double totalNetGain = wages + loans + interest - (tax + rent + food);
+        totalNetGainField.setText(String.format("%.2f",totalNetGain));  // format with 2 digits after the .
+        return totalNetGain;
+    }
+
+    private double calculateTotalIncome(){
+        // get values from income text fields.  value is NaN if an error occurs
+        double wages = getTextFieldValue(wagesField);
+        double loans = getTextFieldValue(loansField);
+        double interest = getTextFieldValue(interestField);
+
+        // clear total field and return if any value is NaN (error)
+        if (Double.isNaN(wages) || Double.isNaN(loans) || Double.isNaN(interest)) {
+            totalNetGainField.setText("");  // clear total income field
+            wages = 0.0;
+            return wages;   // exit method and do nothing
+        }
+
+        // gather *current/most recent* selection of the JComboBox
+        String selectedWageTime = (String)wagesList.getSelectedItem();
+        String selectedLoansTime = (String)loansList.getSelectedItem();
+        String selectedInterestTime = (String)interestList.getSelectedItem();
+
+        wages = returnNetGain(selectedWageTime, wages);
+        loans = returnNetGain(selectedLoansTime, loans);
+        interest = returnNetGain(selectedInterestTime, interest);
+
+
+        // otherwise calculate total income and update text field
+        double totalIncome = wages + loans + interest;
+        totalIncomeField.setText(String.format("%.2f",totalIncome));  // format with 2 digits after the .
         return totalIncome;
+    }
+
+    private double calculateTotalSpending(){
+        // get values from income text fields.  value is NaN if an error occurs
+        double tax = getTextFieldValue(taxField);
+        double rent = getTextFieldValue(rentField);
+        double food = getTextFieldValue(foodField);
+
+        // clear total field and return if any value is NaN (error)
+        if (Double.isNaN(tax) || Double.isNaN(rent) || Double.isNaN(food)) {
+            totalNetGainField.setText("");  // clear total income field
+            tax = 0.0;
+            return tax;   // exit method and do nothing
+        }
+
+        // gather *current/most recent* selection of the JComboBox
+        String selectedTaxTime = (String)taxList.getSelectedItem();
+        String selectedRentTime = (String)rentList.getSelectedItem();
+        String selectedFoodTime = (String)foodList.getSelectedItem();
+
+        tax = returnNetGain(selectedTaxTime, tax);
+        rent = returnNetGain(selectedRentTime, rent);
+        food = returnNetGain(selectedFoodTime, food);
+
+        // otherwise calculate total income and update text field
+        double totalSpending = 0 - (tax + rent + food);
+        totalSpendingField.setText(String.format("%.2f",totalSpending));  // format with 2 digits after the .
+        return totalSpending;
     }
 
     private double returnNetGain(String timePeriod, Double money){

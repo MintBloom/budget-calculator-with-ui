@@ -1,16 +1,5 @@
-// base code for student budget assessment
-// Students do not need to use this code in their assessment, fine to junk it and do something different!
-//
-// Your submission must be a maven project, and must be submitted via Codio, and run in Codio
-//
 // user can enter in wages and loans and calculate total income
-//
-// run in Codio 
-// To see GUI, run with java and select Box Url from Codio top line menu
-//
 // Layout - Uses GridBag layout in a straightforward way, every component has a (column, row) position in the UI grid
-// Not the prettiest layout, but relatively straightforward
-// Students who use IntelliJ or Eclipse may want to use the UI designers in these IDEs , instead of GridBagLayout
 package Budget;
 
 // Swing imports
@@ -55,8 +44,7 @@ public class BudgetCalculator extends JPanel  {    // based on Swing JPanel
     }
 
     // initialise componenents
-    // Note that this method is quite long.  Can be shortened by putting Action Listener stuff in a separate method
-    // will be generated automatically by IntelliJ, Eclipse, etc
+
     private void initComponents() { 
 
         // Top row (0) - "INCOME" label
@@ -195,41 +183,40 @@ public class BudgetCalculator extends JPanel  {    // based on Swing JPanel
         initListeners();
     }
 
-    // set up listeners
-    // initially just for buttons, can add listeners for text fields
+    // set up listener for text fields, these are initialised in initListeners()
     private void updateFieldAuto(JTextField field){
         field.getDocument().addDocumentListener(new DocumentListener() {
-            
-            // Utility method to retrieve and process the text
+            // method to retrieve and process the text
             private void updateStatus() {
-                // We use SwingUtilities.invokeLater to ensure any UI-related 
-                // operations are done safely on the Event Dispatch Thread (EDT)
                 SwingUtilities.invokeLater(() -> {
+                    // this code block waits until the textField has a "stable" state, and is put at the back of Swing's event queue
                     calculateTotalIncome();
                     calculateTotalSpending();
                     calculateNetGain();
                 });
             }
 
-            @Override
+            @Override // method is required by the DocumentListener()
             public void insertUpdate(DocumentEvent e) {
                 updateStatus();
             }
 
-            @Override
+            @Override // method is required by the DocumentListener()
             public void removeUpdate(DocumentEvent e) {
                 updateStatus();
             }
 
-            @Override
+            @Override // method is required by the DocumentListener()
             public void changedUpdate(DocumentEvent e) {
                 updateStatus();
             }
         });
     }
+
+    // set up listeners just for buttons and JComboBox
     private void initListeners() {
 
-        // applying the updateFieldAuto method to multiple fields
+        // apply the updateFieldAuto method to multiple fields
         updateFieldAuto(wagesField);
         updateFieldAuto(loansField);
         updateFieldAuto(interestField);
@@ -244,16 +231,20 @@ public class BudgetCalculator extends JPanel  {    // based on Swing JPanel
             }
         });
 
-        // calculateButton - call calculateTotalIncome() when pressed
+        // calculateButton - call all calculate() methods when pressed
         calculateButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                calculateTotalIncome();
+                calculateTotalSpending();
                 calculateNetGain();
             }
         });
 
-        // general action listener which which call calculateTotalIncome() when action is performed
+        // general action listener which will call all calculate() methods when action is performed
         ActionListener calculateJComboListener = new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent e){
+                calculateTotalIncome();
+                calculateTotalSpending();
                 calculateNetGain();
             }
         };
@@ -271,7 +262,7 @@ public class BudgetCalculator extends JPanel  {    // based on Swing JPanel
 
     // add a component at specified row and column in UI.  (0,0) is top-left corner
     private void addComponent(Component component, int gridrow, int gridcol) {
-        layoutConstraints.fill = GridBagConstraints.HORIZONTAL;   // always use horixontsl filll
+        layoutConstraints.fill = GridBagConstraints.HORIZONTAL;   // always use horizontal fil
         layoutConstraints.gridx = gridcol;
         layoutConstraints.gridy = gridrow;
         add(component, layoutConstraints);
@@ -305,6 +296,7 @@ public class BudgetCalculator extends JPanel  {    // based on Swing JPanel
         String selectedRentTime = (String)rentList.getSelectedItem();
         String selectedFoodTime = (String)foodList.getSelectedItem();
 
+        // return each value after being changed according to their respective recurrence time periods
         wages = returnNetGain(selectedWageTime, wages);
         loans = returnNetGain(selectedLoansTime, loans);
         interest = returnNetGain(selectedInterestTime, interest);
@@ -316,12 +308,12 @@ public class BudgetCalculator extends JPanel  {    // based on Swing JPanel
         double totalNetGain = wages + loans + interest - (tax + rent + food);
 
         if(totalNetGain>=0){
-            totalNetGainField.setBackground(Color.BLACK);
-            totalNetGainField.setForeground(Color.WHITE);
+            totalNetGainField.setBackground(Color.BLACK); // set the textfield colour to black
+            totalNetGainField.setForeground(Color.WHITE); // set the text colour to white for readability
         }
         else if(totalNetGain<0){
-            totalNetGainField.setBackground(Color.RED);
-            totalNetGainField.setForeground(Color.WHITE);
+            totalNetGainField.setBackground(Color.RED); // set the textfield colour to red
+            totalNetGainField.setForeground(Color.WHITE); // set the text colour to white for readability
         }
 
         totalNetGainField.setText(String.format("%.2f",totalNetGain));  // format with 2 digits after the .
@@ -346,6 +338,7 @@ public class BudgetCalculator extends JPanel  {    // based on Swing JPanel
         String selectedLoansTime = (String)loansList.getSelectedItem();
         String selectedInterestTime = (String)interestList.getSelectedItem();
 
+        // return each value after being changed according to their respective recurrence time periods
         wages = returnNetGain(selectedWageTime, wages);
         loans = returnNetGain(selectedLoansTime, loans);
         interest = returnNetGain(selectedInterestTime, interest);
@@ -375,6 +368,7 @@ public class BudgetCalculator extends JPanel  {    // based on Swing JPanel
         String selectedRentTime = (String)rentList.getSelectedItem();
         String selectedFoodTime = (String)foodList.getSelectedItem();
 
+        // return each value after being changed according to their respective recurrence time periods 
         tax = returnNetGain(selectedTaxTime, tax);
         rent = returnNetGain(selectedRentTime, rent);
         food = returnNetGain(selectedFoodTime, food);

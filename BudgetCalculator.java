@@ -314,6 +314,16 @@ public class BudgetCalculator extends JPanel  {    // based on Swing JPanel
 
         // otherwise calculate total income and update text field
         double totalNetGain = wages + loans + interest - (tax + rent + food);
+
+        if(totalNetGain>=0){
+            totalNetGainField.setBackground(Color.BLACK);
+            totalNetGainField.setForeground(Color.WHITE);
+        }
+        else if(totalNetGain<0){
+            totalNetGainField.setBackground(Color.RED);
+            totalNetGainField.setForeground(Color.WHITE);
+        }
+
         totalNetGainField.setText(String.format("%.2f",totalNetGain));  // format with 2 digits after the .
         return totalNetGain;
     }
